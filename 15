@@ -1,0 +1,88 @@
+-- Wait for the player and character to load
+repeat wait() until game.Players.LocalPlayer.Character
+local player = game.Players.LocalPlayer
+local character = player.Character
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Function to find ball and goal
+function getBall()
+    return workspace:FindFirstChild("Ball")  -- Update with correct ball name if needed
+end
+
+function getOpponentGoal()
+    return workspace:FindFirstChild("OpponentGoal")  -- Update with correct goal name if needed
+end
+
+-- Power Shot (Always Scores)
+function Pth3Shot()
+    local ball = getBall()
+    local opponentGoal = getOpponentGoal()
+
+    if ball and opponentGoal then
+        local goalPosition = opponentGoal.Position
+        local direction = (goalPosition - ball.Position).unit
+
+        -- Ensure the ball moves towards the goal with enough force
+        ball.CFrame = CFrame.new(ball.Position, goalPosition)
+        ball.Velocity = direction * 800  -- Increased force for guaranteed goal
+
+        -- Explosion Sound Effect
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://130766856"  -- Explosion sound
+        sound.Parent = ball
+        sound:Play()
+    else
+        warn("Ball or Opponent Goal not found!")
+    end
+end
+
+-- Dribbling (50m Teleportation Without Lag)
+function Pth3Dribble()
+    local direction = humanoidRootPart.CFrame.LookVector
+    local newPosition = humanoidRootPart.Position + direction * 50  -- Now only 50 meters for better control
+
+    -- Prevent rollback by setting PrimaryPartCFrame
+    character:SetPrimaryPartCFrame(CFrame.new(newPosition))
+
+    -- Blue Aura Effect
+    local aura = Instance.new("Part")
+    aura.Shape = Enum.PartType.Ball
+    aura.Size = Vector3.new(6, 6, 6)
+    aura.Position = newPosition
+    aura.Anchored = true
+    aura.CanCollide = false
+    aura.Color = Color3.fromRGB(0, 0, 255)
+    aura.Material = Enum.Material.Neon
+    aura.Parent = workspace
+
+    -- Play Neymar Sound
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://130766856"
+    sound.Parent = character
+    sound:Play()
+
+    -- Temporary Speed Boost
+    character.Humanoid.WalkSpeed = 50  -- Adjusted speed for smooth dribbling
+    wait(1)  
+    character.Humanoid.WalkSpeed = 16  -- Reset Speed
+
+    game:GetService("Debris"):AddItem(aura, 1.5)  -- Remove aura after 1.5 sec
+end
+
+-- UI Setup (Placed on Top of Yellow Flow Meter)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+local button1 = Instance.new("TextButton")
+button1.Size = UDim2.new(0.2, 0, 0.05, 0)
+button1.Position = UDim2.new(0.4, 0, 0.6, 0)  -- Positioned on top of Flow Meter
+button1.Text = "Pth3 Shot"
+button1.Parent = ScreenGui
+button1.MouseButton1Click:Connect(Pth3Shot)
+
+local button2 = Instance.new("TextButton")
+button2.Size = UDim2.new(0.2, 0, 0.05, 0)
+button2.Position = UDim2.new(0.4, 0, 0.65, 0)  -- Positioned on top of Flow Meter
+button2.Text = "Pth3 Dribble"
+button2.Parent = ScreenGui
+button2.MouseButton1Click:Connect(Pth3Dribble)
